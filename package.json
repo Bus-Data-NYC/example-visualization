@@ -1,0 +1,28 @@
+{
+  "name": "example-bus-visualitations",
+  "version": "0.0.0",
+  "description": "Stops data visualization",
+  "main": "views/stops.js",
+  "scripts": {
+    "start": "node server-cluster.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [
+    "bus",
+    "nyc",
+    "transit",
+    "civic-tech"
+  ],
+  "author": "Kuan Butts",
+  "license": "MIT",
+  "bugs": {
+    "url": "node"
+  },
+  "homepage": "https://github.com/kuanb/nyc-bus",
+  "dependencies": {
+    "mysql": "^2.9.0"
+  }
+}
