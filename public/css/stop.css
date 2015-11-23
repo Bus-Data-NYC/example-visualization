@@ -1,0 +1,16 @@
+#map {
+	background-color: #4d4d4d;
+	height: 400px;
+	margin-bottom: 10px;
+	border-bottom: 5px solid #4d4d4d;
+}
+
+.ajax {
+	position: fixed;
+	z-index: 9999;
+	top: 10px;
+	right: 0px;
+	background-color: #00c3c3;
+	padding: 3px 10px 3px 7px;
+	color: #FFF;
+}
