@@ -8,7 +8,8 @@ var globals = {
 		date: null,
 		hour: null,
 		res: null,
-		vis: null
+		vis: null,
+		max: {val: 0, id: null},
 	}
 }
 
@@ -49,6 +50,32 @@ function redrawStops () {
 				}
 			}
 		});
+	}
+
+	if (globals.lastcall.vis !== null) {
+		Object.keys(globals.lastcall.vis).forEach(function (k) {
+			Object.keys(globals.lastcall.vis[k]).forEach(function (a) {
+				if (globals.lastcall.vis[k][a].properties.vis) {
+					var ll = globals.lastcall.vis[k][a].getLatLng();
+					if (map.getBounds().contains(ll)) {
+						if (globals.lastcall.vis[k][a].properties.onmap == false) {
+							globals.lastcall.vis[k][a].addTo(map);
+							globals.lastcall.vis[k][a].properties.onmap = true;
+						}
+					} else {
+						if (globals.lastcall.vis[k][a].properties.onmap) {
+							map.removeLayer(globals.lastcall.vis[k][a]);
+							globals.lastcall.vis[k][a].properties.onmap = false;
+						}
+					}
+				} else {
+					if (globals.lastcall.vis[k][a].properties.onmap) {
+						map.removeLayer(globals.lastcall.vis[k][a]);
+						globals.lastcall.vis[k][a].properties.onmap = false;
+					}
+				}
+			});
+		});	
 	}
 };
 
@@ -131,27 +158,68 @@ function renderQuery () {
 
 			if (toVis[id] == undefined) toVis[id] = {0: null, 1: null};
 			toVis[id] = {}
-			var ll = [stop.properties.stop_lat, stop.properties.stop_lon]
+			var ll = [stop.properties.stop_lat, stop.properties.stop_lon];
+			var tot = props.early + props.late + props.ontime;
 
 			toVis[id].early = L.circle(ll, props.early*circle_scale, {color: "blue", weight: 1});
-			toVis[id].early["properties"] = {val: props.early, vis: true};
+			toVis[id].early["properties"] = {
+				val: props.early, 
+				vis: false, 
+				onmap: false,
+				pct: Math.round(props.early/tot)
+			};
 
 			toVis[id].late = L.circle(ll, props.late*circle_scale, {color: "red", weight: 1});
-			toVis[id].late["properties"] = {val: props.late, vis: true};
+			toVis[id].late["properties"] = {
+				val: props.late, 
+				vis: false, 
+				onmap: false,
+				pct: Math.round(props.late/tot)
+			};
 
 			toVis[id].ontime = L.circle(ll, props.ontime*circle_scale, {color: "yellow", weight: 1});
-			toVis[id].ontime["properties"] = {val: props.ontime, vis: true};
+			toVis[id].ontime["properties"] = {
+				val: props.ontime, 
+				vis: false, 
+				onmap: false,
+				pct: Math.round(props.ontime/tot)
+			};
+
+			var new_max = Math.max(globals.lastcall.max.val, props.early, props.late, props.ontime);
+			if (new_max !== globals.lastcall.max.val) {
+				globals.lastcall.max.id = id;
+				globals.lastcall.max.val = new_max;
+			}
+
 		}
 	});
-
-	Object.keys(toVis).forEach(function (stop_id) {
-		var stop = toVis[stop_id];
-		stop.early.addTo(map)
-		stop.late.addTo(map)
-		stop.ontime.addTo(map)
+	
+	$("#changeable_max_miss")[0].innerHTML = "max size is " + 
+																				globals.lastcall.max.val + " vehicles x ";
+	var tot = "";
+	[0, 1].forEach(function (dir) {
+		var rte = globals.lastcall.res[globals.lastcall.max.id][dir];
+		if (rte !== null) {
+		  var tr = "<tr>" +
+		    "<td>" + rte.route_id + "</td>" +
+		    "<td>" + rte.early_5 + "</td>" +
+		    "<td>" + rte.early_2 + "</td>" +
+		    "<td>" + rte.early + "</td>" +
+		    "<td>" + rte.on_time + "</td>" +
+		    "<td>" + rte.late + "</td>" +
+		    "<td>" + rte.late_10 + "</td>" +
+		    "<td>" + rte.late_15 + "</td>" +
+		    "<td>" + rte.late_20 + "</td>" +
+		    "<td>" + rte.late_30 + "</td>" +
+		    "<td>" + rte.fulfilled + "</td>" +
+		  "</tr>";
+		  tot = tot + tr;
+		}
 	});
+	$("#changeable_worst_stop")[0].innerHTML = tot;
 
 	globals.lastcall.vis = toVis;
+	toggleStopTypes();
 };
 
 function resizeCircles () {
@@ -167,11 +235,11 @@ function resizeCircles () {
 };
 
 function toggleStopTypes () {
-  var early = $("#param_stoptype_early")[0].checked;
-  var ontime = $("#param_stoptype_ontime")[0].checked;
-  var late = $("#param_stoptype_late")[0].checked;
-
 	if (globals.lastcall.vis !== null) {
+	  var early = $("#param_stoptype_early")[0].checked;
+	  var ontime = $("#param_stoptype_ontime")[0].checked;
+	  var late = $("#param_stoptype_late")[0].checked;
+
 		Object.keys(globals.lastcall.vis).forEach(function (k) {
 			Object.keys(globals.lastcall.vis[k]).forEach(function (a) {
 				var add_early = ((a == "early") && early)
@@ -184,18 +252,24 @@ function toggleStopTypes () {
 				var rem_late = ((a == "late") && !late)
 
 				if (add_early || add_ontime || add_late) {
-					if (globals.lastcall.vis[k][a].properties.vis == false) {
-						globals.lastcall.vis[k][a].addTo(map);
-					}
 					globals.lastcall.vis[k][a].properties.vis = true;
 				} else if (rem_early || rem_ontime || rem_late) {
-					if (globals.lastcall.vis[k][a].properties.vis == true) {
-						map.removeLayer(globals.lastcall.vis[k][a]);
-					}
 					globals.lastcall.vis[k][a].properties.vis = false;
 				}
+
+				// check to see if passes the thresholds set for percentage balance
+				var ok = true;
+				["early", "late", "ontime"].forEach(function (type) {
+					var thresh = $("#param_" + type + "_threshold").val();
+					if (globals.lastcall.vis[k][a].properties.pct < thresh) {
+						ok = false;
+					}
+				});
+				globals.lastcall.vis[k][a].properties.vis = ok;
 			});
 		});
+
+		redrawStops();
 	}
 };
 
