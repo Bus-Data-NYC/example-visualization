@@ -115,7 +115,7 @@ function getConfig(file){
 // Start up managment
 var server;
 function start() {
-	server = app.listen(80, function () {
+	server = app.listen(8080, function () {
 		var host = server.address().address;
 		var port = server.address().port;
 		console.log('Example app listening at http://%s:%s', host, port);
