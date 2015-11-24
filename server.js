@@ -65,41 +65,48 @@ app.get('/api/arrivals', function (req, res) {
 	} else {
 
 		rows = getConfig('public/data/example_response.json');
+		var clean = {};
+		rows.forEach(function (stop) {
+			var k = stop.stop_id;
+			if (clean[k] == undefined) { clean[k] = {0: null, 1: null}; }
+			var d = stop.direction_id;
+			if (d == 0 || d == 1) { clean[k][d] = stop; delete clean[k][d].stop_id; delete clean[k][d].direction_id; }
+		});
+		res.status(200).send(clean);
 
-	// 	var query = "SELECT rds.stop_id, route_id, direction_id, " + 
-	// 							"fulfilled, early_5, early_2, early, " + 
-	// 							"on_time, late, late_10, late_15, late_20, late_30 " + 
-	// 							"FROM stops " + 
-	// 							"INNER JOIN rds ON stops.stop_id = rds.stop_id " + 
-	// 							"INNER JOIN adherence ON adherence.rds = rds.rds " + 
-	// 							"WHERE feed_index >= 26 " + 
-	// 							"AND date = '" + date + "'" + 
-	// 							"AND hour = '" + hour + "' LIMIT 200;"
+		// var query = "SELECT rds.stop_id, route_id, direction_id, " + 
+		// 						"fulfilled, early_5, early_2, early, " + 
+		// 						"on_time, late, late_10, late_15, late_20, late_30 " + 
+		// 						"FROM stops " + 
+		// 						"INNER JOIN rds ON stops.stop_id = rds.stop_id " + 
+		// 						"INNER JOIN adherence ON adherence.rds = rds.rds " + 
+		// 						"WHERE feed_index >= 26 " + 
+		// 						"AND date = '" + date + "'" + 
+		// 						"AND hour = '" + hour + "';"
 
-	// 	console.log(query);
-	// 	connection.query(query, function (err, rows, fields) {
-	// 		if (err) {
-	// 			res.status(500).send("MySQL error during query run. " + err);
-	// 		} else {
+		// connection.query(query, function (err, rows, fields) {
+		// 	if (err) {
+		// 		res.status(500).send("MySQL error during query run. " + err);
+		// 	} else {
 
-				var clean = {};
+		// 		var clean = {};
 
-				rows.forEach(function (stop) {
-					var k = stop.stop_id;
-					if (clean[k] == undefined) {
-						clean[k] = {0: null, 1: null};
-					}
-					var d = stop.direction_id;
-					if (d == 0 || d == 1) {
-						clean[k][d] = stop;
-						delete clean[k][d].stop_id;
-						delete clean[k][d].direction_id;
-					}
-				});
+		// 		rows.forEach(function (stop) {
+		// 			var k = stop.stop_id;
+		// 			if (clean[k] == undefined) {
+		// 				clean[k] = {0: null, 1: null};
+		// 			}
+		// 			var d = stop.direction_id;
+		// 			if (d == 0 || d == 1) {
+		// 				clean[k][d] = stop;
+		// 				delete clean[k][d].stop_id;
+		// 				delete clean[k][d].direction_id;
+		// 			}
+		// 		});
 
-				res.status(200).send(clean);
-	// 		}
-	// 	});
+		// 		res.status(200).send(clean);
+		// 	}
+		// });
 	}
 });
 

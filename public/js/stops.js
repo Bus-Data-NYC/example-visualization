@@ -235,7 +235,9 @@ function resizeCircles () {
 };
 
 function toggleStopTypes () {
+	toggleLoad("on");
 	if (globals.lastcall.vis !== null) {
+		console.log("Running long toggle process.");
 	  var early = $("#param_stoptype_early")[0].checked;
 	  var ontime = $("#param_stoptype_ontime")[0].checked;
 	  var late = $("#param_stoptype_late")[0].checked;
@@ -270,7 +272,9 @@ function toggleStopTypes () {
 		});
 
 		redrawStops();
+		console.log("Finished long toggle process.");
 	}
+	toggleLoad("off");
 };
 
 function getCounts (aspect, stop) {

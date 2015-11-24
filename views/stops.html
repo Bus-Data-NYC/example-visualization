@@ -127,11 +127,11 @@
 
       <div class="row">
         <div class="one-half column">
-          Minimum percentage ontime (<span id="changeable_early_threshold">0</span> percent)
+          Minimum percentage early (<span id="changeable_early_threshold">0</span> percent)
         </div>
         <div class="one-half column">
           <input class="u-full-width" type="range" id="param_early_threshold" 
-              min="0" max="100" value="0" onclick="updateScale()">
+              min="0" max="100" value="0" onclick="updateScale_tresh()">
         </div>
       </div>
 
@@ -141,17 +141,17 @@
         </div>
         <div class="one-half column">
           <input class="u-full-width" type="range" id="param_ontime_threshold" 
-              min="0" max="100" value="0" onclick="updateScale()">
+              min="0" max="100" value="0" onclick="updateScale_tresh()">
         </div>
       </div>
 
       <div class="row">
         <div class="one-half column">
-          Minimum percentage ontime (<span id="changeable_late_threshold">0</span> percent)
+          Minimum percentage late (<span id="changeable_late_threshold">0</span> percent)
         </div>
         <div class="one-half column">
           <input class="u-full-width" type="range" id="param_late_threshold" 
-              min="0" max="100" value="0" onclick="updateScale()">
+              min="0" max="100" value="0" onclick="updateScale_tresh()">
         </div>
       </div>
 
@@ -261,15 +261,19 @@
 
     function updateScale () {
       if (!$(".ajax").is(":visible")) {
-        if ($("#changeable_scale")[0].innerHTML !== $("#param_scale")[0].value) {
-          $("#changeable_scale")[0].innerHTML !== $("#param_scale")[0].value;
-          resizeCircles();
-        } else {
-          $("#changeable_early_threshold")[0].innerHTML = $("#param_early_threshold").val();
-          $("#changeable_ontime_threshold")[0].innerHTML = $("#param_ontime_threshold").val();
-          $("#changeable_late_threshold")[0].innerHTML = $("#param_late_threshold").val();
-          toggleStopTypes();
-        }     
+        console.log("Update scale.");
+        $("#changeable_scale")[0].innerHTML !== $("#param_scale")[0].value;
+        resizeCircles();   
+      } 
+    }
+
+    function updateScale_tresh () {
+      if (!$(".ajax").is(":visible")) {
+        console.log("Update scale thresh.");
+        $("#changeable_early_threshold")[0].innerHTML = $("#param_early_threshold").val();
+        $("#changeable_ontime_threshold")[0].innerHTML = $("#param_ontime_threshold").val();
+        $("#changeable_late_threshold")[0].innerHTML = $("#param_late_threshold").val();
+        toggleStopTypes();  
       } 
     }
 
