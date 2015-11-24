@@ -9,7 +9,17 @@ var path = require('path');
 var fs = require("fs");
 
 var mysql = require('mysql');
-var credentials = require('./credentials.js');
+var credentials
+try {
+	credentials = require('./credentials.js');
+} catch (e) {
+	credentials = {
+		host: process.env.HOST,
+		user: process.env.USERNAME,
+		password: process.env.PASSWORD,
+		database: process.env.DATABASE
+	}
+}
 
 var connection = mysql.createConnection({
 	host     : credentials.host,
