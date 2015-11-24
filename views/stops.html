@@ -65,14 +65,29 @@
 
       <div class="row">
         <div class="four columns">
+          Toggle visibility by stop count type
+        </div>
+        <div class="two columns">
+          <input type="checkbox" id="param_stoptype_all"> <span class="label-body">All</span>
+        </div>
+        <div class="one-half column" onclick="uncheck('stoptype')">
+          <input type="checkbox" id="param_stoptype_early"> <span class="label-body">Early</span>
+          <input type="checkbox" id="param_stoptype_ontime"> <span class="label-body">On Time</span>
+          <input type="checkbox" id="param_stoptype_late"> <span class="label-body">Late</span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="four columns">
           Early Categories
         </div>
         <div class="two columns">
-          <input type="checkbox"> <span class="label-body">All</span>
+          <input type="checkbox" id="param_early_all"> <span class="label-body">All</span>
         </div>
-        <div class="one-half column">
-          <input type="checkbox"> <span class="label-body">5 min</span>
-          <input type="checkbox"> <span class="label-body">2 min</span>
+        <div class="one-half column" onclick="uncheck('early')">
+          <input type="checkbox" id="param_early_five"> <span class="label-body">5 min</span>
+          <input type="checkbox" id="param_early_two"> <span class="label-body">2 min</span>
+          <input type="checkbox" id="param_early_sub"> <span class="label-body">Sub</span>
         </div>
       </div>
 
@@ -81,13 +96,14 @@
           Late Categories
         </div>
         <div class="two columns">
-          <input type="checkbox"> <span class="label-body">All</span>
+          <input type="checkbox" id="param_late_all"> <span class="label-body">All</span>
         </div>
-        <div class="one-half column">
-          <input type="checkbox"> <span class="label-body">10 min</span>
-          <input type="checkbox"> <span class="label-body">15 min</span>
-          <input type="checkbox"> <span class="label-body">20 min</span>
-          <input type="checkbox"> <span class="label-body">30 min</span>
+        <div class="one-half column" onclick="uncheck('late')">
+          <input type="checkbox" id="param_late_sub"> <span class="label-body">Sub</span>
+          <input type="checkbox" id="param_late_ten"> <span class="label-body">10 min</span>
+          <input type="checkbox" id="param_late_fifteen"> <span class="label-body">15 min</span>
+          <input type="checkbox" id="param_late_twenty"> <span class="label-body">20 min</span>
+          <input type="checkbox" id="param_late_thirty"> <span class="label-body">30 min</span>
         </div>
       </div>
 
@@ -105,11 +121,11 @@
 
       <div class="row">
         <div class="one-half column">
-          Headway threshold
-          (set minute headways)
+          Scale results radius (<span id="changeable_scale">200</span> meters)
         </div>
         <div class="one-half column">
-          <input class="u-full-width" type="range" id="param_headway" min="0" max="10">
+          <input class="u-full-width" type="range" id="param_scale" 
+              min="1" max="400" val="200" onclick="updateScale()">
         </div>
       </div>
 
@@ -126,7 +142,7 @@
       layers: []
     });
 
-    L.tileLayer('http://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png').addTo(map);
+    L.tileLayer('http://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png').addTo(map);
 
     toggleLoad("on");
     $.getJSON("api/stops")
@@ -140,6 +156,60 @@
 
     map.on("moveend", function(){ redrawStops(); });
 
+    function uncheck (which) {
+      $("#param_" + which + "_all")[0].checked = false;   
+      if (which == "stoptype") {
+        toggleStopTypes();
+      }
+    }
+
+    $("#param_stoptype_all")[0].onclick = function () {
+      $("#param_stoptype_early")[0].checked = true;
+      $("#param_stoptype_ontime")[0].checked = true;
+      $("#param_stoptype_late")[0].checked = true;
+      toggleStopTypes();
+    };
+
+    $("#param_early_all")[0].onclick = function () {
+      $("#param_early_sub")[0].checked = true;
+      $("#param_early_two")[0].checked = true;
+      $("#param_early_five")[0].checked = true;
+    };
+
+    $("#param_late_all")[0].onclick = function () {
+      $("#param_late_sub")[0].checked = true;
+      $("#param_late_ten")[0].checked = true;
+      $("#param_late_fifteen")[0].checked = true;
+      $("#param_late_twenty")[0].checked = true;
+      $("#param_late_thirty")[0].checked = true;
+    };
+
+    function getCategories () {
+      return {
+        early: $("#param_early_sub")[0].checked,
+        early_2: $("#param_early_two")[0].checked,
+        early_5: $("#param_early_five")[0].checked,
+
+        late: $("#param_late_sub")[0].checked,
+        late_10: $("#param_late_ten")[0].checked,
+        late_15: $("#param_late_fifteen")[0].checked,
+        late_20: $("#param_late_twenty")[0].checked,
+        late_30: $("#param_late_thirty")[0].checked
+      }
+    };
+
+    function updateScale () {
+      $("#changeable_scale")[0].innerHTML = $("#param_scale")[0].value;
+      resizeCircles();
+    }
+
+    // start with everything toggled
+    $("#param_stoptype_all")[0].onclick();
+    $("#param_early_all")[0].onclick();
+    $("#param_late_all")[0].onclick();
+    $("#param_stoptype_all")[0].checked = true;
+    $("#param_early_all")[0].checked = true;
+    $("#param_late_all")[0].checked = true;
 
   </script>
 
